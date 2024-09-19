@@ -234,7 +234,7 @@ docker compose up --build
 In the image below you can see the FULL Mage pipeline with all branches and then the 2 main branches seperate besides each other
 ![mage_pipeline.png](images/mage_pipeline_big.png)
 
-- This pipeline gets the data, processes it and saves it to Redshift or local Postgres databas (Part 1), then the dbt (Part 2) is used to process the data and make it usable in a dashboard
+- This pipeline gets the data, processes it and saves it to Redshift or local Postgres database (Part 1), then the dbt (Part 2) is used to process the data and make it usable in a dashboard
 
 <p float="left">
   <img src="./images/aws_pipeline.png" width="45%" />
