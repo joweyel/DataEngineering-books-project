@@ -136,6 +136,19 @@ Choose `Attach policies directly` and add the following AWS managed policies and
   - [AWS_SECRET_ACCESS_KEY=...](./dev.env#L5)
   - [AWS_REGION=...](./dev.env#L6)
 
+**`IMPORTANT: Adding inbound rule to Redshift`**
+- Open the redshift workgroup you are using
+- Click on the sg-link under `VPC security group`
+- Check the security group checkmark and select `Inbound rules`
+- Click `[Edit inbound rules]`
+- Add **`Inbound rule`** with the following parameters
+  - *Type: IPv4
+  - *Type*: Redshift
+  - *Protocol*: TCP
+  - *Port range*: 5439
+  - *Source*:
+    - Anywhere-IPv4 with `0.0.0.0/0`
+    - My IP with your IP (determined by AWS)
 
 ### Obtaining Kaggle API-credentials
 - Data-source: [here](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset/)

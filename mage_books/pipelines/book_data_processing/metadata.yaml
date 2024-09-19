@@ -125,7 +125,7 @@ blocks:
   language: python
   name: s3_to_redshift
   retry_config: null
-  status: executed
+  status: updated
   timeout: null
   type: custom
   upstream_blocks:
@@ -241,7 +241,7 @@ blocks:
   language: sql
   name: dbt/dbt_books/models/staging/stg_books_rs
   retry_config: null
-  status: not_executed
+  status: executed
   timeout: null
   type: dbt
   upstream_blocks:
@@ -265,7 +265,7 @@ blocks:
   language: sql
   name: dbt/dbt_books/models/staging/stg_ratings_rs
   retry_config: null
-  status: not_executed
+  status: executed
   timeout: null
   type: dbt
   upstream_blocks:
@@ -289,7 +289,7 @@ blocks:
   language: sql
   name: dbt/dbt_books/models/staging/stg_users_rs
   retry_config: null
-  status: executed
+  status: failed
   timeout: null
   type: dbt
   upstream_blocks:
@@ -588,6 +588,6 @@ type: python
 uuid: book_data_processing
 variables:
   dbt_mode: local
-  local: true
+  local: 'True'
 variables_dir: /home/src/mage_data/mage_books
 widgets: []

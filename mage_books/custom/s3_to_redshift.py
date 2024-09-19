@@ -10,6 +10,7 @@ from mage_books.utils.redshift.redshift_sql import (
     check_data_exists,
     copy_data_to_redshift
 )
+import os
 import boto3
 import pandas as pd
 from os import path
@@ -25,13 +26,6 @@ if 'test' not in globals():
 
 @custom
 def transform_custom(*args, **kwargs):
-    """
-    args: The output from any upstream parent blocks (if applicable)
-
-    Returns:
-        Anything (e.g. data frame, dictionary, array, int, str, etc.)
-    """
-
     # Function to execute queries with error handling
     def execute_with_error_handling(sql):
         try:
@@ -48,7 +42,6 @@ def transform_custom(*args, **kwargs):
     config_profile = 'default'
     cfg = ConfigFileLoader(config_path, config_profile)
 
-
     ## Redshift
     region = cfg.get("AWS_REGION")
     table_name_template = "{obj_name}"
@@ -56,7 +49,7 @@ def transform_custom(*args, **kwargs):
     database_name = cfg.get("REDSHIFT_DBNAME")
     workgroup_name = cfg.get("REDSHIFT_WGNAME")
     iam_role_arn = cfg.get("REDSHIFT_IAM_PROFILE")
-
+    
     client_redshift = boto3.client("redshift-data", region_name=region)
     
     send_query = partial(
@@ -71,9 +64,9 @@ def transform_custom(*args, **kwargs):
     # S3 parameter
     data_path = kwargs.get("data_path", "data")
     object_names = ["books", "users", "ratings"]
-    bucket_name = "book-recommendation-data"
+    bucket_name = os.getenv("S3_BUCKET_NAME")
     replace_table = kwargs.get("replace", False)  # Get replace argument from kwargs
-
+    
     for obj_name in object_names:
 
         # Get data from S3 bucket

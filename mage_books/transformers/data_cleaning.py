@@ -57,8 +57,7 @@ def transform(
         "publisher": pd.StringDtype()
     }
     df_books_out = df_books.astype(book_dtypes)
-
-
+    print("books-data processed")
 
     ##########################
     ## Processing user-data ##
@@ -89,6 +88,8 @@ def transform(
         "country": pd.StringDtype(),
     }
     df_users_out = df_users.astype(users_dtypes)
+    print("users-data processed")
+
 
     ##########################
     ## Processing ratings-data
@@ -115,6 +116,8 @@ def transform(
         "rating": pd.Int32Dtype(),
     }
     df_ratings_out = df_ratings.astype(ratings_dtypes)
+    print("ratings-data processed")
+
 
     data_transformed = {
         "books": df_books_out,
@@ -124,9 +127,6 @@ def transform(
     # print("books", data_transformed["books"].dtypes)
     # print("users", data_transformed["users"].dtypes)
     # print("ratings", data_transformed["ratings"].dtypes)
-
-    print(type(data_transformed))
-
 
     return data_transformed
     # return data_transformed["books"], data_transformed["users"], data_transformed["ratings"]
