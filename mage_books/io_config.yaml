@@ -1,0 +1,27 @@
+version: 0.1.1
+default:
+  # AWS
+  AWS_ACCESS_KEY_ID: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
+  AWS_SECRET_ACCESS_KEY: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
+  # AWS_SESSION_TOKEN: session_token (Used to generate Redshift credentials)
+  AWS_REGION: "{{ env_var('AWS_REGION') }}"
+  
+  # PostgresSQL
+  POSTGRES_CONNECT_TIMEOUT: "{{ env_var('POSTGRES_CONNECT_TIMEOUT') }}"
+  POSTGRES_DBNAME: "{{ env_var('POSTGRES_DBNAME') }}"
+  POSTGRES_SCHEMA: "{{ env_var('POSTGRES_SCHEMA') }}"
+  POSTGRES_USER: "{{ env_var('POSTGRES_USER') }}"
+  POSTGRES_PASSWORD: "{{ env_var('POSTGRES_PASSWORD') }}"
+  POSTGRES_HOST: "{{ env_var('POSTGRES_HOST') }}"
+  POSTGRES_PORT: "{{ env_var('POSTGRES_PORT') }}"
+  
+  # Redshift
+  REDSHIFT_SCHEMA: books_schema # Optional
+  REDSHIFT_DBNAME: dev
+  REDSHIFT_PORT: 5439
+
+  # Redshift Serverless
+  REDSHIFT_WGNAME: "{{ env_var('REDSHIFT_WGNAME') }}"
+  REDSHIFT_HOST:  "{{ env_var('REDSHIFT_HOST') }}"
+  REDSHIFT_IAM_PROFILE: "{{ env_var('REDSHIFT_IAM_PROFILE') }}"
+  

@@ -1,0 +1,58 @@
+version: 2
+
+sources:
+  - name: staging
+    database: dev
+    schema: books_schema
+    tables:
+      - name: books
+      - name: ratings
+      - name: users
+
+
+models:
+  - name: dim_country_lut_rs
+    description: Mapping from original country name to correct country name.
+    columns:
+      - name: country_in
+        description: "Country in input data for mapping."
+      - name: country_out
+        description: "Country to map the input to."
+ 
+  - name: stg_books_rs
+    description: "Staging model for books data"
+    columns:
+      - name: isbn
+        description: "International Standard Book Number"
+      - name: title
+        description: "Title of the book"
+      - name: author
+        description: "Author of the book"
+      - name: year
+        description: "Publication year of the book"
+      - name: publisher
+        description: "Publisher of the book"
+
+  - name: stg_users_rs
+    description: "Staging model for users data"
+    columns:
+      - name: user_id
+        description: "Unique identifier for the user"
+      - name: age
+        description: "Age of the user"
+      - name: city
+        description: "City where the user resides"
+      - name: state
+        description: "State where the user resides"
+      - name: country
+        description: "Country where the user resides"
+
+  - name: stg_ratings_rs
+    description: "Staging model for ratings data"
+    columns:
+      - name: user_id
+        description: "Unique identifier for the user"
+      - name: isbn
+        description: "International Standard Book Number"
+      - name: rating
+        description: "Rating given by the user"

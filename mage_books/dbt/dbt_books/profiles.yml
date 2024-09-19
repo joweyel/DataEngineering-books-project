@@ -1,0 +1,12 @@
+dbt_books:
+  outputs:
+    dev:
+      dbname: {{ env_var('REDSHIFT_DBNAME') }}
+      host: {{ env_var('REDSHIFT_HOST') }}
+      method: iam
+      port: {{ env_var('REDSHIFT_PORT') }}
+      schema: {{ env_var('REDSHIFT_SCHEMA') }}
+      threads: 2
+      type: redshift
+      user: admin
+  target: dev

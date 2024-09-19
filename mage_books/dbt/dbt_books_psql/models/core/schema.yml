@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: facts_all
+    description: "Facts table combining books, users, and ratings data"
+    columns:
+      - name: user_id
+        description: "Unique identifier for each user"
+      - name: isbn
+        description: "International Standard Book Number"
+      - name: rating
+        description: "Rating given by the user"
+      - name: age
+        description: "Age of the user"
+      - name: city
+        description: "City where the user resides"
+      - name: state
+        description: "State where the user resides"
+      - name: country
+        description: "Country where the user resides"
+      - name: title
+        description: "Title of the book"
+      - name: author
+        description: "Author of the book"
+      - name: year
+        description: "Publication year of the book"
+      - name: publisher
+        description: "Publisher of the book"
+
+  - name: dim_country_count
+    description: "This model aggregates ratings by country."
+    columns:
+      - name: country
+        description: "The country of the user."
+      - name: count
+        description: "The count of ratings from users in the specified country."
+
+  - name: dim_age_ratings
+    description: "Model to categorize ages into brackets and count the number of ratings within each bracket."
+    columns:
+      - name: age_bracket
+        description: "Age bracket categories."
+      - name: rating_count
+        description: "Count of ratings within each age bracket."
+
+  - name: dim_country_book_ratings
+    description: "Aggregates book ratings by country, including average rating and count of ratings per book."
+    columns:
+      - name: country
+        description: "The country where the ratings originated."
+      - name: isbn
+        description: "International Standard Book Number for the book."
+      - name: title
+        description: "Title of the book."
+      - name: avg_score
+        description: "Average rating of the book in the specified country."
+      - name: rating_count
+        description: "Number of ratings received by the book in the specified country."
