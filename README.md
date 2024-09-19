@@ -358,3 +358,6 @@ To visualize data, that was extracted from the dbt-pipeline the monitoring softw
 
 
 -------------------------------------
+
+## Future Work (TODOs)
+- Provisioning with Terraform
