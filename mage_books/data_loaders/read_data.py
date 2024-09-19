@@ -31,7 +31,11 @@ def load_data(*args, **kwargs) -> Tuple[
     save_path = "/home/src/data"
 
     # Check if local data used
-    load_local = kwargs.get("local", "False").lower() == "true"
+    local = kwargs.get("local", "False")
+    if isinstance(local, str):
+        load_local = local.lower() == "true"
+    else:
+        load_local = bool(local)
 
     if load_local == False:
         print("Load data from Kaggle")

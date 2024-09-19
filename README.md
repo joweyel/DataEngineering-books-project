@@ -167,7 +167,7 @@ The other three parameters have to be set with Redshift running
 - [REDSHIFT_WGNAME=...](./dev.env#L26)
   - Name of workgroup
 - [REDSHIFT_HOST=...](./dev.env#L27)
-  - Endpoint URL of workgroup
+  - Endpoint URL of workgroup (URL part in this format `URL:port/<xyz>`)
 - [REDSHIFT_IAM_PROFILE=...](./dev.env#L28)
   - ARN of IAM role for AWS Redshift. Can be found in Security and Encryption section of the workspace information
 
@@ -184,7 +184,7 @@ docker compose up --build
 - See [PGADMIN_DEFAULT_EMAIL](docker-compose.yml#L43) and [PGADMIN_DEFAULT_PASSWORD](docker-compose.yml#L44) for login information
 - You are now logged in to pgadmin
 
-#### Create and connect server to postgres database where results of the pipeline are stored
+#### Create and connect server to postgres database where results of the pipeline will be stored
 - Right-click on server in object explorer, then `[Register]`, then `[Server...]`
 - Provide an appropriate `Name`, then go to connections and use the parmaeters following the line [here](dev.env#L11)
   - `Host name/address`: postgres (docker-compose address)
@@ -322,8 +322,7 @@ If everything is set up correctly configured in [`.env`](./.env), lets look at t
 
 **Running the entire pipeline by triggering a pipeline-run**
 - Go to the trigger section (lightning icon on the left side-bar) or click [here](http://localhost:6789/pipelines/book_data_processing/triggers).
-- Click on `Manuel Trigger` and click on **Run@once**-button to start the entire pipeline
-
+- Go to the pipelines [triggers](http://localhost:6789/pipelines/book_data_processing/triggers/) and click `[Run@once]
 ![trigger_run](images/trigger.png)
 
 After completion of the pipeline you can see the following contents in the specified database of your Redshift workgroup:

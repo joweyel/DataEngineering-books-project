@@ -125,12 +125,16 @@ def transform(
     # print("users", data_transformed["users"].dtypes)
     # print("ratings", data_transformed["ratings"].dtypes)
 
+    print(type(data_transformed))
+
+
     return data_transformed
+    # return data_transformed["books"], data_transformed["users"], data_transformed["ratings"]
+
 
 @test
 def test_output(output, *args) -> None:
     """
     Template code for testing the output of the block.
     """
-    print(output.keys())
     assert output is not None, 'The output is undefined'
