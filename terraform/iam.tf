@@ -24,8 +24,8 @@ resource "aws_iam_role" "ec2-instance-role" {
 }
 
 resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
-  name        = "DBAndGrafanaAccessPolicy"
-  description = "Allow EC2 instance to access Aurora DB"
+  name        = "DBAndGrafanaAndSecretsAccessPolicy"
+  description = "Allow EC2 instance to access Aurora DB, S3, and Secrets Manager"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -45,7 +45,7 @@ resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
           "ec2:DescribeNetworkInterfaces",
           "ec2:DescribeSecurityGroups",
           "ec2:ModifyNetworkInterfaceAttribute",
-          "ec2:RevokeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress"
         ],
         Resource = "*"
       },
@@ -60,11 +60,11 @@ resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
           "rds-data:BatchExecuteStatement",
           "rds-data:BeginTransaction",
           "rds-data:CommitTransaction",
-          "rds-data:RollbackTransaction",
+          "rds-data:RollbackTransaction"
         ],
         Resource = ["*"
-          # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:cluster:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}",
-          # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:db:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}:*"
+         # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:cluster:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}",
+         # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:db:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}:*"
         ]
       },
       {
@@ -72,7 +72,7 @@ resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
         Action = [
           "s3:PutObject",
           "s3:GetObject",
-          "s3:GetObjectAcl",
+          "s3:GetObjectAcl"
         ],
         Resource = [
           "arn:aws:s3:::${aws_s3_bucket.book-recommendation-data-bucket.bucket}/*"
@@ -81,15 +81,26 @@ resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
       {
         Effect = "Allow",
         Action = [
-          "s3:ListBucket",
+          "s3:ListBucket"
         ],
         Resource = [
           "arn:aws:s3:::${aws_s3_bucket.book-recommendation-data-bucket.bucket}"
+        ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ],
+        Resource = [
+          "${aws_secretsmanager_secret.access-keys}"
         ]
       }
     ]
   })
 }
+
 
 resource "aws_iam_role_policy_attachment" "ec2-instance-role-policy-attachment" {
   role       = aws_iam_role.ec2-instance-role.name

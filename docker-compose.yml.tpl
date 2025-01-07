@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    secrets:
+      - aws_secret
     environment:
       PROJECT_NAME: ${PROJECT_NAME}
       USER_CODE_PATH: /home/src/${PROJECT_NAME}
@@ -14,6 +16,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
     ports:
       - 6789:6789
     volumes:
@@ -33,3 +36,6 @@ services:
       - ./grafana/provisioning/:/etc/grafana/provisioning
     restart: unless-stopped
 
+secrets:
+  aws_secret:
+    external: true

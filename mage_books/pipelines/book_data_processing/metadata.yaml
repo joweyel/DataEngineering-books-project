@@ -10,12 +10,12 @@ blocks:
   language: python
   name: read_data
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: data_loader
   upstream_blocks: []
   uuid: read_data
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks:
@@ -35,7 +35,7 @@ blocks:
   upstream_blocks:
   - read_data
   uuid: data_cleaning
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []
@@ -51,7 +51,7 @@ blocks:
   upstream_blocks:
   - data_cleaning
   uuid: save_to_aurora_rds_db
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []
@@ -67,7 +67,7 @@ blocks:
   upstream_blocks:
   - data_cleaning
   uuid: save_local_postgres
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []
@@ -77,13 +77,13 @@ blocks:
   language: python
   name: save_aws_s3
   retry_config: null
-  status: executed
+  status: updated
   timeout: null
   type: data_exporter
   upstream_blocks:
   - data_cleaning
   uuid: save_aws_s3
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []
@@ -332,7 +332,7 @@ cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}
 conditionals:
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []
