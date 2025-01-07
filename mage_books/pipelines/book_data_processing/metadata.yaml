@@ -45,7 +45,7 @@ blocks:
   language: python
   name: save_to_aurora_rds_db
   retry_config: null
-  status: not_executed
+  status: updated
   timeout: null
   type: data_exporter
   upstream_blocks:
@@ -77,7 +77,7 @@ blocks:
   language: python
   name: save_aws_s3
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: data_exporter
   upstream_blocks:
@@ -383,7 +383,7 @@ tags: []
 type: python
 uuid: book_data_processing
 variables:
-  dbt_mode: local
+  dbt_mode: aws
   local: 'False'
 variables_dir: /home/src/mage_data/mage_books
 widgets: []
