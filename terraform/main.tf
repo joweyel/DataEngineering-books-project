@@ -225,8 +225,8 @@ resource "aws_security_group" "de-rds-sg" {
 #   engine               = "aurora-postgresql"
 #   engine_mode          = "provisioned"
 #   engine_version       = "16.6"
-#   database_name        = "dev"
-#   master_username      = "admin"
+#   database_name        = var.postgres-dbname
+#   master_username      = var.postgres-username
 #   master_password      = var.postgres-password
 
 #   skip_final_snapshot = true
