@@ -21,14 +21,14 @@ def export_data_to_s3(data, **kwargs) -> None:
     config_profile = 'default'
     os.environ["AWS_ACCESS_KEY_ID"] = get_secret_value("AWS_ACCESS_KEY_ID")
     os.environ["AWS_SECRET_ACCESS_KEY"] = get_secret_value("AWS_SECRET_ACCESS_KEY")
-    os.environ["AWS_REGION"] = "us-east-1"
+    
 
     for key in data.keys():
         df = data[key]
         df = df.astype({col: pd.Int32Dtype() for col in df.select_dtypes(include='Int64').columns})
 
         filename = f"{key}.parquet"
-
+        bucket_name = os.getenv("S3_BUCKET_NAME")
         object_key = f"data/{filename}"
         print(f"loading data: {object_key}")
 

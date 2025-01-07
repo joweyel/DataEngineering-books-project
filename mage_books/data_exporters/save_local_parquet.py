@@ -13,7 +13,7 @@ def export_data_to_file(
 ) -> None:
     for key in data.keys():
         df = data[key]
-        df = df.astype({col: pd.Int32Dtype() for col in df.select_dtypes(include='Int64').columns})  # Ensure In32
+        df = df.astype({col: pd.Int32Dtype() for col in df.select_dtypes(include='Int64').columns})
         filepath = f"/home/src/data/{key}.parquet"
         print(f"Saving {filepath}")
         FileIO().export(df, filepath)

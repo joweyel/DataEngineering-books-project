@@ -93,7 +93,7 @@ blocks:
   language: python
   name: save_local_parquet
   retry_config: null
-  status: executed
+  status: updated
   timeout: null
   type: data_exporter
   upstream_blocks:
@@ -348,7 +348,7 @@ conditionals:
   upstream_blocks:
   - save_local_postgres
   uuid: local_check
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []
