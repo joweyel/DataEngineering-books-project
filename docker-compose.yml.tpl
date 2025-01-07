@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    secrets:
-      - aws_secret
     environment:
       PROJECT_NAME: ${PROJECT_NAME}
       USER_CODE_PATH: /home/src/${PROJECT_NAME}
@@ -35,7 +33,3 @@ services:
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning
     restart: unless-stopped
-
-secrets:
-  aws_secret:
-    external: true
