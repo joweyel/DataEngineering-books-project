@@ -475,6 +475,7 @@ The credentials are retrieved from the encrypted storage inside the ETL-pieline 
 ```python
 from mage_ai.data_preparation.shared.secrets import get_secret_value
 
-secret_val = get_secret_value('<secret_name>')
+secret_val = get_secret_value("<secret_name>")
 # Or for environment variables
+os.environ["<secret_name>"] = get_secret_value("<secret_name>")
 ```
