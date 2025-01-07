@@ -6,12 +6,11 @@ import pandas as pd
 from typing import Tuple
 
 # Kaggle imports 
-from mage_books.utils.loader_utils.kaggle import get_credentials
-creds = get_credentials(os.getenv("KAGGLE_PATH"))
-os.environ['KAGGLE_USERNAME'] = creds[0]
-os.environ['KAGGLE_KEY'] = creds[1]
-from kaggle.api.kaggle_api_extended import KaggleApi
+from mage_ai.data_preparation.shared.secrets import get_secret_value
 
+os.environ["KAGGLE_USERNAME"] = get_secret_value("KAGGLE_USERNAME")
+os.environ["KAGGLE_KEY"] = get_secret_value("KAGGLE_KEY")
+from kaggle.api.kaggle_api_extended import KaggleApi
 
 if 'data_loader' not in globals():
     from mage_ai.data_preparation.decorators import data_loader

@@ -359,5 +359,103 @@ To visualize data, that was extracted from the dbt-pipeline the monitoring softw
 
 -------------------------------------
 
-## Future Work (TODOs)
-- Provisioning with Terraform
+# DE-Project
+
+The goal of this new version of my Data Engineering project on books data is to automate the deployment of AWS infrastructure with IaC instead of creating everything manually. For this purpose Terraform is used to create appropriate resources for an ETL pipeline and a database, where data is saved to and read from.
+
+## AWS user creation
+
+**`Step 0: Create AWS account (optional)`**
+- Skip this step if you already have an AWS account
+- Otherwise follow the steps here: https://aws.amazon.com/resources/create-account/
+
+**`Step 1: Specify user details`**
+- Go to the IAM service in the AWS web-ui & click `Create user`
+- Set `User name`
+- Check `Provide user access to the AWS Management Console - optional`
+- Select `I want to create an IAM user`
+- Set a password
+  - You can, an should change the password at the next login
+
+
+**`Step 2: Set permissions`**
+Setting the polcy / permissions for the newly created user can be used like below:
+
+- **`Attach policies directly`**: For now attach the `AdministratorAccess` Policy to the IAM user you currently create (can be changed later)
+- **`Add user to group`**: If you have a IAM group with the `AdministratorAccess` policy attached to it, you could use it instead of using an inline policy
+
+> The policy attached here is very permissive and will be changed in further commits.
+
+
+**`Step 3: Review and create`**
+- click on the create button
+
+**`Step 4: Retrieve password`**
+- Obtain the sign-in details and save them for later
+
+**`Create access keys`**
+- Go to IAM and select your newly created IAM user
+- Click on `Create access key` button in the `Security Credentials` section of the user
+- **Use case**: `Local code`
+- Retrieve access keys in next step (download the csv)
+- Add them to the credentials in your `.aws` folder
+  ```bash
+  # Provide IAM User, Access keys, Region and output format
+  aws configure --profile <iam-user-name>
+  ```
+
+**`Create keypair`**
+- Go to `[EC2]` -> `[Key pairs]` -> `[Create key pair]`
+- Choose name (e.g. `de_key`)
+- Type: `RSA`
+- `Private key file format`: pem
+
+## Terraform  
+In this section the creation of required infrastructure is done. The Mage pipeline is hosted on a EC2 Instance and the data is stored in a Aurora DB with Postgres engine.
+
+### Creating the Infrastructure
+- Create `tfvars`-file in the terraform-directory
+  ```bash
+  cd terraform
+  touch deployment.tfvars
+  ```
+  Set the parameters to something like here (only password should be really specified):
+  ```
+  project-name      = "mage_books"
+  postgres-schema   = "books_schema"
+  postgres-password = "adminpassword123"  # change this
+  ```
+
+
+
+```bash
+# Go to the terraform directory (if not already there)
+cd terraform
+
+# Set the AWS profile to use when creating the infrastructure
+# Terraform commands must be done in the same cli-session
+aws configure --profile <iam-profile-name>
+
+# Make sure to use the correct AWS profile is used by setting the credentials also with env-variables
+export AWS_PROFILE=<iam-profile-name>
+export AWS_ACCESS_KEY_ID=<access-key-id>
+export AWS_SECRET_ACCESS_KEY=<secret-key>
+export AWS_DEFAULT_REGION=<region>
+export AWS_REGION=<region>
+
+
+# Initialization of terraform resources of provider
+terraform init
+
+# check the infrastructure before applying
+terraform plan -var-file="deployment.tfvars"
+# Apply the infrastructure
+terraform apply -var-file="deployment.tfvars"
+
+# (!!!) When destroying the infrastructure use this
+terraform destroy -var-file="deployment.tfvars"
+```
+
+The commands above will createa VPC with 3 subnets where the pipeline is in the public subnet and the databease in the private ones (requires >= 2 AZs/Subnets).
+
+The code requires an API-Token that you have to provide in the Mage-UI when everything is running.

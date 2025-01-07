@@ -11,11 +11,4 @@ sources:
       block_uuid: s3_to_redshift
       pipeline_uuid: book_data_processing
     name: book_data_processing_s3_to_redshift
-  - description: Dataframe for block `save_local_postgres` of the `book_data_processing`
-      mage pipeline.
-    identifier: mage_book_data_processing_save_local_postgres
-    meta:
-      block_uuid: save_local_postgres
-      pipeline_uuid: book_data_processing
-    name: book_data_processing_save_local_postgres
 version: 2

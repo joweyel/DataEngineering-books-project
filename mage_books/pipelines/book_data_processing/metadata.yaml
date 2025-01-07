@@ -10,18 +10,19 @@ blocks:
   language: python
   name: read_data
   retry_config: null
-  status: executed
+  status: updated
   timeout: null
   type: data_loader
   upstream_blocks: []
   uuid: read_data
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
   downstream_blocks:
   - save_local_parquet
   - save_aws_s3
   - save_local_postgres
+  - save_to_aurora_rds_db
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -34,13 +35,26 @@ blocks:
   upstream_blocks:
   - read_data
   uuid: data_cleaning
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
-  downstream_blocks:
-  - dbt/dbt_books_psql/models/staging/stg_books
-  - dbt/dbt_books_psql/models/staging/stg_ratings
-  - seed_lookup_table_local
+  downstream_blocks: []
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: save_to_aurora_rds_db
+  retry_config: null
+  status: not_executed
+  timeout: null
+  type: data_exporter
+  upstream_blocks:
+  - data_cleaning
+  uuid: save_to_aurora_rds_db
+- all_upstream_blocks_executed: false
+  color: null
+  configuration: {}
+  downstream_blocks: []
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -53,37 +67,10 @@ blocks:
   upstream_blocks:
   - data_cleaning
   uuid: save_local_postgres
-- all_upstream_blocks_executed: true
-  color: null
-  configuration:
-    dbt:
-      command: seed
-    dbt_profile_target: ''
-    dbt_project_name: dbt/dbt_books_psql
-    disable_query_preprocessing: false
-    export_write_policy: append
-    file_source:
-      path: dbts/seed_lookup_table_local.yaml
-    use_raw_sql: false
-  downstream_blocks:
-  - dbt/dbt_books_psql/models/staging/dim_country_lut
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: yaml
-  name: seed_lookup_table_local
-  retry_config: null
-  status: executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - save_local_postgres
-  uuid: seed_lookup_table_local
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
-  downstream_blocks:
-  - s3_to_redshift
+  downstream_blocks: []
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -96,7 +83,7 @@ blocks:
   upstream_blocks:
   - data_cleaning
   uuid: save_aws_s3
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
   downstream_blocks: []
@@ -128,10 +115,9 @@ blocks:
   status: updated
   timeout: null
   type: custom
-  upstream_blocks:
-  - save_aws_s3
+  upstream_blocks: []
   uuid: s3_to_redshift
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt:
@@ -178,7 +164,7 @@ blocks:
   upstream_blocks:
   - dbt/dbt_books/models/core/facts_all_rs
   uuid: dbt/dbt_books/models/core/dim_age_ratings_rs
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt_project_name: dbt/dbt_books
@@ -224,7 +210,7 @@ blocks:
   - dbt/dbt_books/models/staging/stg_ratings_rs
   - dbt/dbt_books/models/staging/stg_users_rs
   uuid: dbt/dbt_books/models/core/facts_all_rs
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt_project_name: dbt/dbt_books
@@ -247,7 +233,7 @@ blocks:
   upstream_blocks:
   - s3_to_redshift
   uuid: dbt/dbt_books/models/staging/stg_books_rs
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt_project_name: dbt/dbt_books
@@ -271,7 +257,7 @@ blocks:
   upstream_blocks:
   - s3_to_redshift
   uuid: dbt/dbt_books/models/staging/stg_ratings_rs
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt_project_name: dbt/dbt_books
@@ -342,201 +328,11 @@ blocks:
   - dbt/dbt_books/models/staging/stg_ratings_rs
   - dbt/dbt_books/models/staging/stg_users_rs
   uuid: dbt/dbt_books/models/core/dim_country_count_rs
-- all_upstream_blocks_executed: true
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/staging/stg_books.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/staging/stg_books.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks:
-  - dbt/dbt_books_psql/models/core/dim_country_book_ratings
-  - dbt/dbt_books_psql/models/core/facts_all
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/staging/stg_books
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - save_local_postgres
-  uuid: dbt/dbt_books_psql/models/staging/stg_books
-- all_upstream_blocks_executed: true
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/staging/stg_ratings.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/staging/stg_ratings.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks:
-  - dbt/dbt_books_psql/models/core/dim_country_book_ratings
-  - dbt/dbt_books_psql/models/core/dim_country_count
-  - dbt/dbt_books_psql/models/core/facts_all
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/staging/stg_ratings
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - save_local_postgres
-  uuid: dbt/dbt_books_psql/models/staging/stg_ratings
-- all_upstream_blocks_executed: true
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/staging/dim_country_lut.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/staging/dim_country_lut.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks:
-  - dbt/dbt_books_psql/models/staging/stg_users
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/staging/dim_country_lut
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - seed_lookup_table_local
-  uuid: dbt/dbt_books_psql/models/staging/dim_country_lut
-- all_upstream_blocks_executed: false
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/staging/stg_users.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/staging/stg_users.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks:
-  - dbt/dbt_books_psql/models/core/dim_country_book_ratings
-  - dbt/dbt_books_psql/models/core/dim_country_count
-  - dbt/dbt_books_psql/models/core/facts_all
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/staging/stg_users
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - dbt/dbt_books_psql/models/staging/dim_country_lut
-  uuid: dbt/dbt_books_psql/models/staging/stg_users
-- all_upstream_blocks_executed: false
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/core/dim_age_ratings.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/core/dim_age_ratings.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks: []
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/core/dim_age_ratings
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - dbt/dbt_books_psql/models/core/facts_all
-  uuid: dbt/dbt_books_psql/models/core/dim_age_ratings
-- all_upstream_blocks_executed: false
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/core/facts_all.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/core/facts_all.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks: []
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/core/facts_all
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - dbt/dbt_books_psql/models/staging/stg_books
-  - dbt/dbt_books_psql/models/staging/stg_ratings
-  - dbt/dbt_books_psql/models/staging/stg_users
-  uuid: dbt/dbt_books_psql/models/core/facts_all
-- all_upstream_blocks_executed: false
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/core/dim_country_book_ratings.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/core/dim_country_book_ratings.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks: []
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/core/dim_country_book_ratings
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - dbt/dbt_books_psql/models/staging/stg_books
-  - dbt/dbt_books_psql/models/staging/stg_ratings
-  - dbt/dbt_books_psql/models/staging/stg_users
-  uuid: dbt/dbt_books_psql/models/core/dim_country_book_ratings
-- all_upstream_blocks_executed: false
-  color: null
-  configuration:
-    dbt_project_name: dbt/dbt_books_psql
-    file_path: dbt/dbt_books_psql/models/core/dim_country_count.sql
-    file_source:
-      path: dbt/dbt_books_psql/models/core/dim_country_count.sql
-      project_path: dbt/dbt_books_psql
-    limit: 1000
-  downstream_blocks: []
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: sql
-  name: dbt/dbt_books_psql/models/core/dim_country_count
-  retry_config: null
-  status: not_executed
-  timeout: null
-  type: dbt
-  upstream_blocks:
-  - dbt/dbt_books_psql/models/staging/stg_ratings
-  - dbt/dbt_books_psql/models/staging/stg_users
-  uuid: dbt/dbt_books_psql/models/core/dim_country_count
 cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}
 conditionals:
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
   downstream_blocks: []
@@ -552,7 +348,7 @@ conditionals:
   upstream_blocks:
   - save_local_postgres
   uuid: local_check
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
   downstream_blocks: []
@@ -588,6 +384,6 @@ type: python
 uuid: book_data_processing
 variables:
   dbt_mode: local
-  local: 'True'
+  local: 'False'
 variables_dir: /home/src/mage_data/mage_books
 widgets: []
