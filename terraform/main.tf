@@ -291,6 +291,6 @@ resource "aws_secretsmanager_secret_version" "access-keys-version" {
   secret_id = aws_secretsmanager_secret.access-keys.id
   secret_string = jsonencode({
     AWS_ACCESS_KEY_ID = var.aws-access-key-id,
-    AWS_SECRET_ACCESS_KEY = aws-secret-access-key
+    AWS_SECRET_ACCESS_KEY = var.aws-secret-access-key
   })
 }
