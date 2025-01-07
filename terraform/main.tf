@@ -155,6 +155,7 @@ resource "aws_security_group" "de-ec2-sg" {
 
 ## Create EC2 in public subnet
 resource "aws_instance" "mage-instance" {
+  depends_on = [ aws_rds_cluster_instance.de-aurora-instance ]
   ami = "ami-005fc0f236362e99f" # Ubuntu 22.04
   # instance_type          = "m5.xlarge"  # $0.23/h, 4 vCPU, 16 GB RAM, EBS only
   instance_type               = "m5.large" # $0.096, 2 vCPU, 8 GiB RAM, EBS only
@@ -177,12 +178,12 @@ resource "aws_instance" "mage-instance" {
   user_data = templatefile("user_data.sh", {
     aws_region          = var.region
     project_name        = var.project-name,
-    postgres_dbname     = var.postgres-dbname,
+    postgres_dbname     = aws_rds_cluster.de-aurora-cluster.database_name,
     postgres_schema     = var.postgres-schema,
-    postgres_user       = var.postgres-username,
+    postgres_user       = aws_rds_cluster.de-aurora-cluster.master_username,
     postgres_password   = var.postgres-password,
-    postgres_host       = "localhost",
-    postgres_port       = var.postgres-port,
+    postgres_host       = aws_rds_cluster.de-aurora-cluster.endpoint,
+    postgres_port       = aws_rds_cluster.de-aurora-cluster.port,
     s3_bucket_name      = var.s3-bucket-name,
   })
 
@@ -205,64 +206,65 @@ resource "aws_security_group" "de-rds-sg" {
   }
 }
 
-# # Subnet Group for Aurora Database
-# resource "aws_db_subnet_group" "de-aurora-subnet-group" {
-#   name        = "de-aurora-subnet-group"
-#   description = "Subnet Group for Aurora Database"
-#   subnet_ids  = [
-#     aws_subnet.de-private-subnet-1.id,
-#     aws_subnet.de-private-subnet-2.id
-#   ]
-#   tags = {
-#     Name = "de-aurora-subnet-group"
-#   }
-# }
+# Subnet Group for Aurora Database
+resource "aws_db_subnet_group" "de-aurora-subnet-group" {
+  name        = "de-aurora-subnet-group"
+  description = "Subnet Group for Aurora Database"
+  subnet_ids  = [
+    aws_subnet.de-private-subnet-1.id,
+    aws_subnet.de-private-subnet-2.id
+  ]
+  tags = {
+    Name = "de-aurora-subnet-group"
+  }
+}
 
 
-# resource "aws_rds_cluster" "de-aurora-cluster" {
+resource "aws_rds_cluster" "de-aurora-cluster" {
 
-#   cluster_identifier   = "aurora-cluster"
-#   engine               = "aurora-postgresql"
-#   engine_mode          = "provisioned"
-#   engine_version       = "16.6"
-#   database_name        = var.postgres-dbname
-#   master_username      = var.postgres-username
-#   master_password      = var.postgres-password
+  cluster_identifier   = "aurora-cluster"
+  engine               = "aurora-postgresql"
+  engine_mode          = "provisioned"
+  engine_version       = "16.6"
+  database_name        = var.postgres-dbname
+  master_username      = var.postgres-username
+  master_password      = var.postgres-password
 
-#   skip_final_snapshot = true
-#   allocated_storage   = 20 # 20 GB (min. storage)
+  skip_final_snapshot = true
+  allocated_storage   = 20 # 20 GB (min. storage)
 
-#   scaling_configuration {
-#     auto_pause               = true
-#     min_capacity             = 1
-#     max_capacity             = 2
-#     seconds_until_auto_pause = 300
-#     timeout_action           = "ForceApplyCapacityChange"
-#   }
+  scaling_configuration {
+    auto_pause               = true
+    min_capacity             = 1
+    max_capacity             = 2
+    seconds_until_auto_pause = 300
+    timeout_action           = "ForceApplyCapacityChange"
+  }
 
-#   # Put the cluster in the private subnet
-#   vpc_security_group_ids = [aws_security_group.de-rds-sg.id] # DB SG
+  # Put the cluster in the private subnet
+  vpc_security_group_ids = [aws_security_group.de-rds-sg.id] # DB SG
 
-#   tags = {
-#     Name = "de-aurora-cluster"
-#   }
-# }
+  tags = {
+    Name = "de-aurora-cluster"
+  }
+}
 
-# resource "aws_rds_cluster_instance" "de-aurora-instance" {
-#   count              = 1
-#   identifier         = "de-aurora-instance"
-#   cluster_identifier = aws_rds_cluster.de-aurora-cluster.cluster_identifier_prefix
-#   instance_class     = "db.R6g.large" # 16GB RAM, 2 vCPU, $0.225/h
-#   engine             = aws_rds_cluster.de-aurora-cluster.engine
-#   engine_version     = aws_rds_cluster.de-aurora-cluster.engine_version
+resource "aws_rds_cluster_instance" "de-aurora-instance" {
+  count              = 1
+  identifier         = "de-aurora-instance"
+  cluster_identifier = aws_rds_cluster.de-aurora-cluster.cluster_identifier
+  instance_class     = "db.R6g.large" # 16GB RAM, 2 vCPU, $0.225/h
+  engine             = aws_rds_cluster.de-aurora-cluster.engine
+  engine_version     = aws_rds_cluster.de-aurora-cluster.engine_version
 
-#   # Ensuring that instances are created in the designated subnet
-#   db_subnet_group_name = aws_db_subnet_group.de-aurora-subnet-group.name
+  # Ensuring that instances are created in the designated subnet
+  db_subnet_group_name = aws_db_subnet_group.de-aurora-subnet-group.name
 
-#   tags = {
-#     Name = "de-aurora-instance"
-#   }
-# }
+  tags = {
+    Name = "de-aurora-instance"
+  }
+}
+
 
 # data "template_file" "docker_compose" {
 #   template = file("${path.module}/../docker-compose.yml.tpl")
