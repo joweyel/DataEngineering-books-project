@@ -87,16 +87,6 @@ resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
           "arn:aws:s3:::${aws_s3_bucket.book-recommendation-data-bucket.bucket}"
         ]
       },
-      {
-        Effect = "Allow",
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ],
-        Resource = [
-          "${aws_secretsmanager_secret.access-keys}"
-        ]
-      }
     ]
   })
 }

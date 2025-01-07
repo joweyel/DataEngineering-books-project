@@ -27,15 +27,3 @@ variable "postgres-schema" {
 variable "postgres-password" {
   description = "Password for PostgreSQL DB"
 }
-
-variable "aws-access-key-id" {
-  description = "AWS Access Key ID"
-  type = string
-  sensitive = true
-}
-
-variable "aws-secret-access-key" {
-  description = "AWS Secret Access Key"
-  type = string
-  sensitive = true
-}

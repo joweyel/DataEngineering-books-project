@@ -458,4 +458,23 @@ terraform destroy -var-file="deployment.tfvars"
 
 The commands above will createa VPC with 3 subnets where the pipeline is in the public subnet and the databease in the private ones (requires >= 2 AZs/Subnets).
 
-The code requires an API-Token that you have to provide in the Mage-UI when everything is running.
+
+#### API Token & AWS Access Keys
+The code requires an API-Token that you have to provide in the Mage-UI when everything is running. For some tasks the AWS secret access keys are required and have to be set. For security sake, the credentials should not be available in the EC2 container itself, which hosts the docker container. 
+
+Inside the Docker container the secret should be stored as a *Mage*-Secret (The key on the right sidebar):
+- `KAGGLE_USERNAME`
+- `KAGGLE_KEY`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+
+![mage_secrets](images/mage_secrets.png)
+
+The credentials are retrieved from the encrypted storage inside the ETL-pieline with this code:
+```python
+from mage_ai.data_preparation.shared.secrets import get_secret_value
+
+secret_val = get_secret_value('<secret_name>')
+# Or for environment variables
+```
