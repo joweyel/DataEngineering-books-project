@@ -170,8 +170,20 @@ resource "aws_instance" "mage-instance" {
     volume_type = "gp2"
   }
 
+  # user_data = templatefile("user_data.sh", {
+  #   docker_compose_yaml = data.template_file.docker_compose.rendered
+  # })
+
   user_data = templatefile("user_data.sh", {
-    docker_compose_yaml = data.template_file.docker_compose.rendered
+    aws_region          = var.region
+    project_name        = var.project-name,
+    postgres_dbname     = var.postgres-dbname,
+    postgres_schema     = var.postgres-schema,
+    postgres_user       = var.postgres-username,
+    postgres_password   = var.postgres-password,
+    postgres_host       = "localhost",
+    postgres_port       = var.postgres-port,
+    s3_bucket_name      = var.s3-bucket-name,
   })
 
   tags = {
@@ -266,18 +278,18 @@ resource "aws_security_group" "de-rds-sg" {
 #   }
 # }
 
-data "template_file" "docker_compose" {
-  template = file("${path.module}/../docker-compose.yml.tpl")
+# data "template_file" "docker_compose" {
+#   template = file("${path.module}/../docker-compose.yml.tpl")
 
-  vars = {
-    PROJECT_NAME      = var.project-name
-    POSTGRES_DBNAME   = "dev" # aws_rds_cluster.de-aurora-cluster.database_name
-    POSTGRES_SCHEMA   = var.postgres-schema
-    POSTGRES_USER     = "admin" # aws_rds_cluster.de-aurora-cluster.master_username
-    POSTGRES_PASSWORD = var.postgres-password
-    POSTGRES_HOST     = "localhost" # aws_rds_cluster.de-aurora-cluster.endpoint
-    POSTGRES_PORT     = 5432        # aws_rds_cluster.de-aurora-cluster.port
-    S3_BUCKET_NAME    = var.s3-bucket-name
-    AWS_REGION        = var.region
-  }
-}
+#   vars = {
+#     PROJECT_NAME      = var.project-name
+#     POSTGRES_DBNAME   = "dev" # aws_rds_cluster.de-aurora-cluster.database_name
+#     POSTGRES_SCHEMA   = var.postgres-schema
+#     POSTGRES_USER     = "admin" # aws_rds_cluster.de-aurora-cluster.master_username
+#     POSTGRES_PASSWORD = var.postgres-password
+#     POSTGRES_HOST     = "localhost" # aws_rds_cluster.de-aurora-cluster.endpoint
+#     POSTGRES_PORT     = 5432        # aws_rds_cluster.de-aurora-cluster.port
+#     S3_BUCKET_NAME    = var.s3-bucket-name
+#     AWS_REGION        = var.region
+#   }
+# }

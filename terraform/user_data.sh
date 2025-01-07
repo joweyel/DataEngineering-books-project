@@ -51,10 +51,16 @@ git clone https://github.com/joweyel/DataEngineering-books-project.git /home/ubu
 chown ubuntu:ubuntu -R /home/ubuntu/app
 cd /home/ubuntu/app
 
-# Fill docker-compose template
-cat << EOF > docker-compose.yml
-${docker_compose_yaml}
-EOF
+# Get environment variables only for current session 
+export AWS_REGION="${aws_region}"
+export PROJECT_NAME="${project_name}"
+export POSTGRES_DBNAME="${postgres_dbname}"
+export POSTGRES_SCHEMA="${postgres_schema}"
+export POSTGRES_USER="${postgres_user}"
+export POSTGRES_PASSWORD="${postgres_password}"
+export POSTGRES_HOST="${postgres_host}"
+export POSTGRES_PORT="${postgres_port}"
+export S3_BUCKET_NAME="${s3_bucket_name}"
 
 # Start Docker containers
 docker-compose up -d
