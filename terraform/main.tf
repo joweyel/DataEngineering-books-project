@@ -278,5 +278,6 @@ data "template_file" "docker_compose" {
     POSTGRES_HOST     = "localhost" # aws_rds_cluster.de-aurora-cluster.endpoint
     POSTGRES_PORT     = 5432        # aws_rds_cluster.de-aurora-cluster.port
     S3_BUCKET_NAME    = var.s3-bucket-name
+    AWS_REGION        = var.region
   }
 }
