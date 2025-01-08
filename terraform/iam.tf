@@ -63,8 +63,8 @@ resource "aws_iam_policy" "DBAndGrafanaAccessPolicy" {
           "rds-data:RollbackTransaction"
         ],
         Resource = ["*"
-         # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:cluster:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}",
-         # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:db:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}:*"
+          # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:cluster:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}",
+          # "arn:aws:rds:${var.region}:${data.aws_caller_identity.current.account_id}:db:${aws_rds_cluster.de-aurora-cluster.cluster_identifier}:*"
         ]
       },
       {
