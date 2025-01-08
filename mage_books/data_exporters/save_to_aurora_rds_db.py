@@ -1,8 +1,9 @@
+import os
+from os import path
 from mage_ai.settings.repo import get_repo_path
 from mage_ai.io.config import ConfigFileLoader
 from mage_ai.io.postgres import Postgres
 from pandas import DataFrame
-from os import path
 from mage_ai.data_preparation.shared.secrets import get_secret_value
 
 if 'data_exporter' not in globals():
