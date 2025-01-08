@@ -34,6 +34,9 @@ services:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin # Set your Grafana admin password here
       GF_INSTALL_PLUGINS: grafana-postgres-datasource
+      GF_AWS_default_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      GF_AWS_default_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      GF_AWS_default_REGION: ${AWS_REGION}
     ports:
       - "3000:3000"
     volumes:
