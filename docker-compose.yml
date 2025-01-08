@@ -1,13 +1,13 @@
 # version: '3'
 services:
   magic:
+    network_mode: host
     command: mage start ${PROJECT_NAME}
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       AWS_REGION: ${AWS_REGION}
-      ROLE_ARN: ${ROLE_ARN}
       # AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       # AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}

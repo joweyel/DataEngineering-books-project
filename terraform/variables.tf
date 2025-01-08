@@ -24,8 +24,8 @@ variable "kaggle-username" {
 
 variable "kaggle-key" {
   description = "Kaggel API Key"
-  sensitive = true
-  type = string
+  sensitive   = true
+  type        = string
 }
 
 variable "project-name" {
