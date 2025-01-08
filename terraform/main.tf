@@ -173,8 +173,8 @@ resource "aws_instance" "mage-instance" {
 
   user_data = templatefile("user_data.sh", {
     aws_region            = var.region,
-    # aws_access_key_id     = var.aws-access-key-id,
-    # aws_secret_access_key = var.aws-secret-access-key,
+    aws_access_key_id     = var.aws-access-key-id,
+    aws_secret_access_key = var.aws-secret-access-key,
     kaggle_username       = var.kaggle-username,
     kaggle_key            = var.kaggle-key,
     project_name          = var.project-name,

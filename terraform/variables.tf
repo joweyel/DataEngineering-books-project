@@ -4,26 +4,26 @@ variable "region" {
   type        = string
 }
 
-# variable "aws-access-key-id" {
-#   description = "Access Key ID"
-#   sensitive   = true
-#   type        = string
-# }
+variable "aws-access-key-id" {
+  description = "Access Key ID"
+  sensitive   = true
+  type        = string
+}
 
-# variable "aws-secret-access-key" {
-#   description = "Secret Access Key"
-#   sensitive   = true
-#   type        = string
-# }
+variable "aws-secret-access-key" {
+  description = "Secret Access Key"
+  sensitive   = true
+  type        = string
+}
 
 variable "kaggle-username" {
-  description = "Kaggel username that belongs to an kaggle API Key"
+  description = "Kaggle username that belongs to an kaggle API Key"
   sensitive   = true
   type        = string
 }
 
 variable "kaggle-key" {
-  description = "Kaggel API Key"
+  description = "Kaggle API Key"
   sensitive   = true
   type        = string
 }

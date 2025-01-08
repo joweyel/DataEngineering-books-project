@@ -53,6 +53,8 @@ cd /home/ubuntu/app
 
 # Get environment variables only for current session 
 export AWS_REGION="${aws_region}"
+export AWS_ACCESS_KEY_ID="${aws_access_key_id}"
+export AWS_SECRET_ACCESS_KEY="${aws_secret_access_key}"
 export KAGGLE_USERNAME="${kaggle_username}"
 export KAGGLE_KEY="${kaggle_key}"
 export PROJECT_NAME="${project_name}"
