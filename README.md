@@ -1,367 +1,24 @@
 # DE-Project
 
-
 ## About the Project
 With this project I wanted to build a fully functioning data-pipeline. I obtained data for book-recommendation from kaggle that contains information about books, ratings for books and the users that rated them. The goal is to obtain and process the data to obtain insights into the data.
 
 
+The goal of this new version of my Data Engineering project on books data, is to automate the deployment of AWS infrastructure with IaC instead of creating everything manually. For this purpose Terraform is used to create appropriate resources for an ETL pipeline and a database, where data is saved to and read from.
+
+
 ## Used Technology
 - `ETL-Pipeline / Workflow orchestration`: [Mage](https://www.mage.ai/)
-- `Data Transformation`: [dbt](https://www.getdbt.com/)
-- `Visualization & BI`: [Grafana](https://grafana.com/)
+- `Data Transformation`: [Data Build Tool (dbt)](https://www.getdbt.com/)
+- `Visualization`: [Grafana](https://grafana.com/)
 - <u><b>Online (AWS)</b></u>
-	- `Data Lake`: [AWS S3](https://aws.amazon.com/s3/)
-	- `Data Warehouse`: [AWS Redshift Serverless](https://aws.amazon.com/redshift/redshift-serverless/)
-- <u><b>Offline</b></u>
-  - `Local Database`: [PostgreSQL](https://www.postgresql.org/)
-  - `DB-Client`: [pgAdmin](https://www.pgadmin.org/)
-
-## Overview
-![overview](images/architecture_bg.png)
+	- `Additional Data-Storage`: [AWS S3](https://aws.amazon.com/s3/)
+	- `Compute Resources`: [AWS EC2](https://aws.amazon.com/ec2/)
+	- `Database`: [Amazon Aurora Database](https://aws.amazon.com/rds/aurora/)
 
 
-## Requirements & Prerequisites
-In this sections different steps are gone throught that are required to run the application. To pass required information to the respective docker-container, parameter in the [`dev.env`](./dev.env) have to be provided. **AFTER** filling out all parameterers, the name has to changed to `.env`:
-```bash
-cp dev.env .env
-```
+![Architecture](images/architecture2.png)
 
-### Creation of AWS IAM account & attaching Policies
-In this section the AWS IAM account is set up. The access key and secret access key are obtained and the user is assigned appropriate policies. This is to access the required AWS resources later on.
-
-#### Create IAM account (on AWS root account)
-
-**`Step 1: Specify user details`**   
- - Set `User name` and insert it here [AWS_PROFILE=...](dev.env#L3)
- - Check `Provide user access to the AWS Management Console - optional`
- - Set password
-
-
-**`Step 2: set permissions`**
-
-Choose `Attach policies directly` and add the following AWS managed policies and the two inline policies to the IAM account
-
-<details>
-<summary><b>AWS managed</b></summary>
-<ul>
-    <li><i>AmazonEC2FullAccess</i></li>
-    <li><i>AmazonRedshiftAllCommandsFullAccess</i></li>
-    <li><i>AmazonRedshiftFullAccess</i></li>
-    <li><i>AmazonRedshiftQueryEditorV2FullAccess</i></li>
-    <li><i>AmazonRedshiftQueryEditorV2ReadSharing</i></li>
-    <li><i>AmazonS3FullAccess</i></li>
-    <li><i>AmazonVPCFullAccess</i></li>
-    <li><i>AWSGlueServiceRole</i></li>
-    <li><i>IAMFullAccess</i></li>
-</ul>    
-</details>
-
-<details><summary><b>AllowReadingMetricsFromRedshift</b></summary>
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AllowReadingMetricsFromRedshift",
-            "Effect": "Allow",
-            "Action": [
-                "redshift-data:ListTables",
-                "redshift-data:DescribeTable",
-                "redshift-data:GetStatementResult",
-                "redshift-data:DescribeStatement",
-                "redshift-data:ListStatements",
-                "redshift-data:ListSchemas",
-                "redshift-data:ExecuteStatement",
-                "redshift-data:CancelStatement",
-                "redshift:GetClusterCredentials",
-                "redshift:DescribeClusters",
-                "redshift-serverless:ListWorkgroups",
-                "redshift-serverless:GetCredentials",
-                "secretsmanager:ListSecrets"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "AllowReadingRedshiftQuerySecrets",
-            "Effect": "Allow",
-            "Action": [
-                "secretsmanager:GetSecretValue"
-            ],
-            "Resource": "*",
-            "Condition": {
-                "Null": {
-                    "secretsmanager:ResourceTag/RedshiftQueryOwner": "false"
-                }
-            }
-        }
-    ]
-}
-```
-</details>
-
-<details><summary><b>EC2InstanceConnect</b></summary>
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2-instance-connect:SendSSHPublicKey",
-                "ec2:DescribeInstances"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
-
-</details>
-
-**`Step 3: Review and create`**
-- click on the create button
-
-**`Step 4: Retrieve password`**
-- Obtain the sign-in details and save them for later
-
-**`Create access keys`**
-- Go to IAM 
-- **Use case**: Local code
-- Retrieve access keys in next step (download the csv)
-- Now insert the access keys and region and username into `dev.env`:
-  - [AWS_PROFILE=...](./dev.env#L3)
-  - [AWS_ACCESS_KEY_ID=...](./dev.env#L4)
-  - [AWS_SECRET_ACCESS_KEY=...](./dev.env#L5)
-  - [AWS_REGION=...](./dev.env#L6)
-
-**`IMPORTANT: Adding inbound rule to Redshift`**
-- Open the redshift workgroup you are using
-- Click on the sg-link under `VPC security group`
-- Check the security group checkmark and select `Inbound rules`
-- Click `[Edit inbound rules]`
-- Add **`Inbound rule`** with the following parameters
-  - *Type: IPv4
-  - *Type*: Redshift
-  - *Protocol*: TCP
-  - *Port range*: 5439
-  - *Source*:
-    - Anywhere-IPv4 with `0.0.0.0/0`
-    - My IP with your IP (determined by AWS)
-
-### Obtaining Kaggle API-credentials
-- Data-source: [here](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset/)
-- Create kaggle API-credentials and download them, then save them to `.kaggle/kaggle.json`
-
-### Creating AWS resources
-- **S3-Bucket:** 
-  - Create a `General purpose` bucket with default settings and specify the name after [`S3_BUCKET_NAME=...`](./dev.env#L9) 
-
-- **AWS Redshift Serverless**
-  - [Example video](https://www.youtube.com/watch?v=Kd9_60NC2mY) for creating AWS Redshift Serverless resources
-  - Open AWS Redshift in the application menu
-  - Click on `Try Redshift Serverless free trial`
-  - Choose either default settings (default-namespace) or choose a different name with Custom settings
-  - **Permissions**: Crete the proposed IAM role and associate it with Redshift s.t. it has access to the prev. created S3 bucket
-  - Conclude the process by clicking `Save configuration`
-  - Ceation of namespace also created a workspace
-  - Now click on query data and then click on the serverless dropdown menu on the left. Choose `Federated user`
-  - You should now be able to use the serverless version of AWS Redshift.
-  
-Three parameter of Redshift are fixed here:
-```bash
-# Redshift
-REDSHIFT_SCHEMA=books_schema
-REDSHIFT_DBNAME=dev
-REDSHIFT_PORT=5439
-```
-The other three parameters have to be set with Redshift running
-- [REDSHIFT_WGNAME=...](./dev.env#L26)
-  - Name of workgroup
-- [REDSHIFT_HOST=...](./dev.env#L27)
-  - Endpoint URL of workgroup (URL part in this format `URL:port/<xyz>`)
-- [REDSHIFT_IAM_PROFILE=...](./dev.env#L28)
-  - ARN of IAM role for AWS Redshift. Can be found in Security and Encryption section of the workspace information
-
-### Starting docker compose to access the configured resources
-Now the parmeters of [dev.env](dev.env) should be completely filled out and you can rename `dev.env` to `.env` and start all the containers with docker compose
-```bash
-docker compose up
-# If you staring the docker compose the first time use `--build`
-docker compose up --build
-```
-
-### Login to PgAdmin and accessing tables
-- Open [http://localhost:5050](http://localhost:5050/) in the browser
-- See [PGADMIN_DEFAULT_EMAIL](docker-compose.yml#L43) and [PGADMIN_DEFAULT_PASSWORD](docker-compose.yml#L44) for login information
-- You are now logged in to pgadmin
-
-#### Create and connect server to postgres database where results of the pipeline will be stored
-- Right-click on server in object explorer, then `[Register]`, then `[Server...]`
-- Provide an appropriate `Name`, then go to connections and use the parmaeters following the line [here](dev.env#L11)
-  - `Host name/address`: postgres (docker-compose address)
-  - `Port`: 5432
-  - `Username`: Given here [POSTGRES_USER](dev.env#L15)
-  - `Password`: Given here [POSTGRES_PASSWORD](dev.env#L16)
-
-
-### Login to Grafana and data source configuration
-- Open [http://localhost:3000](http://localhost:3000)
-- Provide the default password `admin`. You can then change the password if you want or use `admin` by providing it again
-- Connection to the Postgres-Datasource is already established/pre-configured (nothing to do here)
-- Establish connection to the Redshift-Datasource
-  - Go to [Data sources](http://localhost:3000/connections/datasources) and add new data source
-  - Search for Redshift and select it
-  - Name must stay `grafana-redshift-datasource` for dashboard to work
-  - Choose for Authentication `Access & secret key` and insert them
-  - Leave everey field blank until the `Default Region`, which has to be set according to the region your Redshift-Datasource is in
-  - In Redshift Details
-    - Choose *Temporary credentials*
-    - Tick the *Serverless* slider
-    - Select the workgroup you use in the *Workgroup* form
-    - Select the database in your Redshift datasource where all results are stored (Redshift-default is dev)
-    - Click save and test. You should get a `Data source is working`-message
-  - Go to `Data sources` and select `grafana-redshift-datasource`
-  - Look at the url and extract the `uid` of the data source: `http://localhost:3000/connections/datasources/edit/<uid>`
-  - Update the template of the redshift-dashboard with:
-    ```bash
-    python3 set_grafana_rs_uid.py <uid>
-    ```
-  - The dashboard is now configured and is waiting for data
-
-## Run Mage Pipeline
-In the image below you can see the FULL Mage pipeline with all branches and then the 2 main branches seperate besides each other
-![mage_pipeline.png](images/mage_pipeline_big.png)
-
-- This pipeline gets the data, processes it and saves it to Redshift or local Postgres database (Part 1), then the dbt (Part 2) is used to process the data and make it usable in a dashboard
-
-<p float="left">
-  <img src="./images/aws_pipeline.png" width="45%" />
-  <img src="./images/local_pipeline.png" width="45%" />
-</p>
-
-- Open the Mage container with [http://localhost:6789/](http://localhost:6789/) and select the pipelines on the left side-bar, then open [`book_data_processing`](http://localhost:6789/pipelines/book_data_processing/edit?sideview=tree)
-![alt text](images/pipeline_list.png)
-
-
-> **`VERY IMPORTANT`**: There are 2 dbt projects:
-> - `dbt_books` (AWS Redshift) 
-> - `dbt_books_psql` (Local postgres)
-> 
-> Both require some information about the data-source to work. To specify which branch (`dbt_books` with `aws` or `local` with `dbt_books_psql`) a global variable **`dbt_mode`** has to be specified as seen below:
-
-![global-vars](images/global_vars.png)
-
-The 2 projects:
-
-![alt text](images/dbt_projects.png)
-
-
-- **dbt_books_psql** (dbt on local Postgres database)
-  - This runs dbt locally and uses the postgresql database located in the container specified under `postgres` in [docker-compose.yml](docker-compose.yml#L26)
-  - The [`profiles.yml`](./mage_books/dbt/dbt_books_psql/profiles.yml)-parameter of the project are interpolated from the environment-variables defined in [`.env`](.env)
-    ```yml
-    dbt_books_psql:
-      outputs:
-        dev:
-          dbname: {{ env_var('POSTGRES_DBNAME') }}
-          host: {{ env_var('POSTGRES_HOST') }}
-          pass: {{ env_var('POSTGRES_PASSWORD') }}
-          port: {{ env_var('POSTGRES_PORT') }}
-          schema: {{ env_var('POSTGRES_SCHEMA') }}
-          threads: 2
-          type: postgres
-          user: {{ env_var('POSTGRES_USER') }}
-      target: dev
-    ```
-  - **Run the project**:
-    ```bash
-    # Open the console (right side-bar second lowest icon [>_])
-    # Navigate to the project
-    cd mage_books/dbt/dbt_books_psql/
-    # Test if connection is established
-    dbt debug
-    ```
-    - Set the `dbt_mode` global variable to `local`
-    - Go to the pipelines [triggers](http://localhost:6789/pipelines/book_data_processing/triggers/) and click `[Run@once]` 
-    - The tables should now be available in the configured postgres-database and visible in the pgadmin-container at [http://localhost:5050](http://localhost:5050/)
-
-- **dbt_books** (dbt on Redshift)
-  - This runs dbt on Redshift and requires some configuration
-  - The [`profiles.yml`](./mage_books/dbt/dbt_books/profiles.yml) parameter of the project are interpolated from the environment-variables defined in [`.env`](.env)
-    ```yml
-    dbt_books:
-      outputs:
-        dev:
-          dbname: {{ env_var('REDSHIFT_DBNAME') }}
-          host: {{ env_var('REDSHIFT_HOST') }}
-          method: iam
-          port: {{ env_var('REDSHIFT_PORT') }}
-          schema: {{ env_var('REDSHIFT_SCHEMA') }}
-          threads: 2
-          type: redshift
-          user: admin
-      target: dev
-      ```
-    - **Run the project**:
-    ```bash
-    ## Console Version
-    # Open the console (right side-bar second lowest icon [>_])
-    # Navigate to the project
-    cd mage_books/dbt/dbt_books/
-    # Test if connection is established
-    dbt debug
-    ```
-    - Set the `dbt_mode` global variable to `aws`
-    - Go to the pipelines [triggers](http://localhost:6789/pipelines/book_data_processing/triggers/) and click `[Run@once]` 
-    - **(Optional) Running isolated blocks instead of all**:
-      - Run the blocks by clicking on the play-button at top of each block (please make sure to have all input tables for a block created before executing it)
-
-
-### Running the Mage Pipeline (Now for real!!)
-If everything is set up correctly configured in [`.env`](./.env), lets look at this checklist and see if everything is correctly in place:
-- `S3`: exists an is configured
-- `Redshift`: exists an is configured
-- `kaggle`: downloaded and correctly placed
-- `dbt`: configured as seen above and tested with `dbt debug` (the `dbt_books`-project)
-
-> ***`Important`***: Redshift usage can sometimes become relatively expensive, so please try out manual execution first, especially for the dbt-blocks. Then check if `stg_books_rs` works by clicking on the `Compile & preview` button at the top of the block
-
-#### You should now be able to run the entire pipeline
-**You can either run each sequential block seperately by** ...
-- Using the play-button at the top of each block
-- Right clicking on a block in the Tree-view and selecting `Run block`
-
-**Running the entire pipeline by triggering a pipeline-run**
-- Go to the trigger section (lightning icon on the left side-bar) or click [here](http://localhost:6789/pipelines/book_data_processing/triggers).
-- Go to the pipelines [triggers](http://localhost:6789/pipelines/book_data_processing/triggers/) and click `[Run@once]
-![trigger_run](images/trigger.png)
-
-After completion of the pipeline you can see the following contents in the specified database of your Redshift workgroup:
-
-![rs_db](images/redshift_db.png)
-
-
-## Grafana for Data Insight and BI
-- Open Grafana in browser: http://localhost:3000/
-
-To visualize data, that was extracted from the dbt-pipeline the monitoring software `Grafana` is used, which is also applicable in the use-case of Business Intelligence (BI). A Grafana container is created when starting [`docker compose`](docker-compose.yml#L50) and is already connected to the [dockerized Postgres database](docker-compose.yml#L26). After running the local dbt-project `dbt_books_psql` you should be able to see the `books_dashboard_grafana`-dashboard, and after running the pipeline (block by block sequentially or whole pipeline) you should see the dashboard that accesses AWS Redshift instead of the local database.
-
-![alt text](images/dashboards.png)
-
-### Grafana Dashboard with data from Postgres database
-![alt text](images/dashboard_local.png)
-
-### Grafana Dashboard with data from AWS Redsift Serverless database
-![alt text](images/dashboard_aws.png)
-
-
--------------------------------------
-
-# DE-Project
-
-The goal of this new version of my Data Engineering project on books data is to automate the deployment of AWS infrastructure with IaC instead of creating everything manually. For this purpose Terraform is used to create appropriate resources for an ETL pipeline and a database, where data is saved to and read from.
 
 ## AWS user creation
 
@@ -411,7 +68,12 @@ Setting the polcy / permissions for the newly created user can be used like belo
 - `Private key file format`: pem
 
 ## Terraform  
+
+![alt text](images/tf_logo_header.png)
+
 In this section the creation of required infrastructure is done. The Mage pipeline is hosted on a EC2 Instance and the data is stored in a Aurora DB with Postgres engine.
+
+The code used for creating the AWS infrastructure can be found in [terraform](terraform/)-subdirectory.
 
 ### Creating the Infrastructure
 - Create `tfvars`-file in the terraform-directory
@@ -419,25 +81,39 @@ In this section the creation of required infrastructure is done. The Mage pipeli
   cd terraform
   touch deployment.tfvars
   ```
-  Set the parameters to something like here (only password should be really specified):
+  Set the parameters to something like here:
   ```
-  project-name      = "mage_books"
-  postgres-schema   = "books_schema"
-  postgres-password = "adminpassword123"  # change this
+  # Replace with your values
+  region                = "your_region"
+  aws-access-key-id     = "your_access_key_id"
+  aws-secret-access-key = "your_secret_access_key"
+  kaggle-username       = "your_kaggle_username"
+  kaggle-key            = "your_kaggle_api_key"
+  s3-bucket-name        = "your_unique_bucket_name"
+
+  # Change these if wanted
+  project-name          = "mage_books"   
+  postgres-dbname       = "dev"
+  postgres-schema       = "books_schema"
+  postgres-username     = "postgres"
+  postgres-password     = "postgres_password123!"
+  
+  # Should stay the same
+  postgres-port         = 5432
+  postgres-timeout      = 30
   ```
 
-
-
+Go to terraform directory and call the following commands:
 ```bash
 # Go to the terraform directory (if not already there)
 cd terraform
 
 # Set the AWS profile to use when creating the infrastructure
 # Terraform commands must be done in the same cli-session
-aws configure --profile <iam-profile-name>
+aws configure --profile <iam-user-name>
 
 # Make sure to use the correct AWS profile is used by setting the credentials also with env-variables
-export AWS_PROFILE=<iam-profile-name>
+export AWS_PROFILE=<iam-user-name>
 export AWS_ACCESS_KEY_ID=<access-key-id>
 export AWS_SECRET_ACCESS_KEY=<secret-key>
 export AWS_DEFAULT_REGION=<region>
@@ -449,6 +125,7 @@ terraform init
 
 # check the infrastructure before applying
 terraform plan -var-file="deployment.tfvars"
+
 # Apply the infrastructure
 terraform apply -var-file="deployment.tfvars"
 
@@ -456,26 +133,115 @@ terraform apply -var-file="deployment.tfvars"
 terraform destroy -var-file="deployment.tfvars"
 ```
 
-The commands above will createa VPC with 3 subnets where the pipeline is in the public subnet and the databease in the private ones (requires >= 2 AZs/Subnets).
+The commands above will createa VPC with 3 subnets:
+
+- **Public Subnet**:
+  - EC2 Instance with 2 Docker container (1x ETL-Pipeline & 1x Grafana Dashboard for Visualization)
+- **Private Subnets**:
+  - AWS Aurora Serverless database with one instance
+
+After `terraform apply ...` finishes you will have access to both running docker container in the public subnet:
+- **Mage ETL-Pipeline**: `<public-ip-of-ec2-instance>:6789`
+- **Grafana for Data Visualization**: `<public-ip-of-ec2-instance>:3000`
+
+## Running the Data Engineering Pipeline on the provisioned Infrastructure
+
+### Run the Mage ETL-Pipeline
+
+As mentioned before, you have to open the Orchstration tool Mage at this address `<public-ip-of-ec2-instance>:6789`. All required parameters to run the pipeline have been set during the instantiation of the AWS infrastructure with the [`user_script`](terraform/user_data.sh) and you can directly run the whole process out of the box.
+
+#### Components of the Mage pipeline (with Links)
+
+##### <u>ETL-Part </u> 
+
+![alt text](images/mage_logo_small.png)
 
 
-#### API Token & AWS Access Keys
-The code requires an API-Token that you have to provide in the Mage-UI when everything is running. For some tasks the AWS secret access keys are required and have to be set. For security sake, the credentials should not be available in the EC2 container itself, which hosts the docker container. 
+- [**`read_data`**](mage_books/data_loaders/read_data.py): 
+  - Gets data from Kaggle API and saves them locally to then read them to dataframe
+- [**`data_cleaning`**](mage_books/transformers/data_cleaning.py):
+  - Transform the obtained data to an appropriate form to be further processed
+- [**`save_local_parquet`**](mage_books/data_exporters/save_local_parquet.py):
+  - Saving transfrormed data locally in parquet-format
+- [**`save_aws_s3`**](mage_books/data_exporters/save_aws_s3.py):
+  - Saves transfrormed data in parquet-format to S3 bucket
+- [**`save_to_aurora_rds_db`**](mage_books/data_exporters/save_to_aurora_rds_db.py):
+  - Saves transfrormed data to *Amazon Aurora Serverless RDS Database*; Creates schemas & tables
 
-Inside the Docker container the secret should be stored as a *Mage*-Secret (The key on the right sidebar):
-- `KAGGLE_USERNAME`
-- `KAGGLE_KEY`
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
+##### <u>DBT-Part</u>
+
+![alt text](images/dbt_logo_small.png)
+
+- [**`seed_lookup_table_country`**](mage_books/dbt/dbt_books_psql/seeds/country_lut.csv):
+  - Seeds the [`country_lut.csv`](mage_books/dbt/dbt_books_psql/seeds/country_lut.csv) lookup-table for dbt with `dbt seed`
+- [**`dim_country_lut`**](mage_books/dbt/dbt_books_psql/models/staging/dim_country_lut.sql)
+  - Processing countries with country lookup-table to get rid of different namings for same country
+- [**`stg_users`**](mage_books/dbt/dbt_books_psql/models/staging/stg_users.sql), [**`stg_books`**](mage_books/dbt/dbt_books_psql/models/staging/stg_books.sql), [**`stg_ratings`**](mage_books/dbt/dbt_books_psql/models/staging/stg_ratings.sql)
+  - Create Views from the tables `users`, `books`, `ratings` with dbt staging-models
+- [**`dim_country_count`**](mage_books/dbt/dbt_books_psql/models/core/dim_country_count.sql)
+  - Obtain table with number of ratings per country
+- [**`dim_country_book_ratings`**](mage_books/dbt/dbt_books_psql/models/core/dim_country_book_ratings.sql)
+  - Obtain table with average rating of books that were reviewed in a country
+- [**`facts_all`**](mage_books/dbt/dbt_books_psql/models/core/facts_all.sql)
+  - Creates big table with all three views joined together
+- [**`dim_age_ratings`**](mage_books/dbt/dbt_books_psql/models/core/dim_age_ratings.sql)
+  - Table that partitions the age of a reviewer in 10 year blocks
+
+![alt text](images/mage_pipeline2.png)
+
+#### Executing the pipeline (manually)
+
+Go to the pipeline-section, by clicking the blue box on the left, then click on `book_data_processing` to open the pipeline:
+
+![pipeline](images/mage_pipeline_section.png)
+
+- You will be find yourself in the `Trigger`-View (blue box)
+- Click on the `Edit Pipeline` section `</>` to access the code of the pipeline
+
+![Trigger View](images/mage_trigger_view.png)
+
+- To run the pipeline manually you now can execute each block sequentially (in order from top to bottom)
+- Each block is executed by clicking the Play button at the top right of a block
+
+#### Executing the pipeline (by triggering pipeline run)
+You can run the pipeline by clicking at **`Run@once`**
+
+![Run@once](images/mage_trigger_run.png)
+
+- This will start a pipeline run which you can now look at by clicking the name of the current run:
+
+![alt text](images/mege_trigger_run_example.png)
+
+- By clicking on the number of `Block runs` you can access the execution status of each block.
 
 
-![mage_secrets](images/mage_secrets.png)
+> After executing the pipeline you will have a populeted database on your Aurora DB Service
 
-The credentials are retrieved from the encrypted storage inside the ETL-pieline with this code:
-```python
-from mage_ai.data_preparation.shared.secrets import get_secret_value
 
-secret_val = get_secret_value("<secret_name>")
-# Or for environment variables
-os.environ["<secret_name>"] = get_secret_value("<secret_name>")
+### Grafana Dashboard from DBT data
+
+- Use this address `<public-ip-of-ec2-instance>:3000` (provide your own IPv4 from instance menu) to access the Grafana UI
+- Login with user: `admin` and password: `admin` and change the login to your desired user and password
+
+![grafana_home](images/grafana_home.png)
+
+- Go to the dashboard-section on the dropdown-menu seen above
+- Click on **`books_dashboard`** and you will see the dashboard
+
+![Dashboard](images/dashboard_grafana_variables.png)
+
+- **`The green boxes`** indicate 2 variables that can be set for filtering results
+  - `Country`: select a country from the country list
+  - `Min. Number of Reviews`: Threshold for number of reviews to consider to get the top 10 books for a country
+    - Some countries in the dataset have not reviwed that many books, which requires the threshold to be lowered somethimes
+
+
+
+
+## `Important`: Dont forget to destroy the provisioned infrastructure!
+
+```bash
+cd terraform
+terraform destroy -var-file="deployment.tfvars"
 ```
+If there are some hickups during the destroy-process it is most likely due to the S3 bucket still having objects in it. Just delete the objects over the AWS Console and restart the destroy-process. The process will now go through.
