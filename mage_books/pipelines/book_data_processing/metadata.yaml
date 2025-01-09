@@ -85,7 +85,7 @@ blocks:
   upstream_blocks:
   - data_cleaning
   uuid: save_local_parquet
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt:
@@ -111,7 +111,7 @@ blocks:
   upstream_blocks:
   - save_to_aurora_rds_db
   uuid: seed_lookup_table_country
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt_project_name: dbt/dbt_books_psql
@@ -135,7 +135,7 @@ blocks:
   upstream_blocks:
   - save_to_aurora_rds_db
   uuid: dbt/dbt_books_psql/models/staging/stg_books
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt: {}
@@ -165,7 +165,7 @@ blocks:
   upstream_blocks:
   - save_to_aurora_rds_db
   uuid: dbt/dbt_books_psql/models/staging/stg_ratings
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt: {}
@@ -193,7 +193,7 @@ blocks:
   upstream_blocks:
   - seed_lookup_table_country
   uuid: dbt/dbt_books_psql/models/staging/dim_country_lut
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     dbt_project_name: dbt/dbt_books_psql

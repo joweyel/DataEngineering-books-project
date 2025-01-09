@@ -6,10 +6,8 @@ import pandas as pd
 from typing import Tuple
 
 # Kaggle imports 
-from mage_ai.data_preparation.shared.secrets import get_secret_value
-
-os.environ["KAGGLE_USERNAME"] = get_secret_value("KAGGLE_USERNAME")
-os.environ["KAGGLE_KEY"] = get_secret_value("KAGGLE_KEY")
+os.environ["KAGGLE_USERNAME"] = os.getenv("KAGGLE_USERNAME")
+os.environ["KAGGLE_KEY"] = os.getenv("KAGGLE_KEY")
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 if 'data_loader' not in globals():

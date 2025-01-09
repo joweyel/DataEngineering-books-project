@@ -1,12 +1,18 @@
 apiVersion: 1
 
 datasources:
-  - name: grafana-postgresql-datasource
+  - name: grafana-postgresql-datasource-aws
     type: postgres
-    url: postgres:5432
-    database: dev
-    user: postgres
+    access: proxy
+    uid: ee9g8tyumwxkwe
+    url: ${POSTGRES_HOST}:${POSTGRES_PORT}
+    database: ${POSTGRES_DBNAME}
+    user: ${POSTGRES_USER}
     secureJsonData:
-      password: postgres
+      password: ${POSTGRES_PASSWORD}
     jsonData:
       sslmode: disable
+      maxOpenConns: 100 
+      maxIdleConns: 10 
+      connMaxLifetime: 14400
+      postgresVersion: 1500

@@ -19,8 +19,8 @@ def export_data_to_s3(data, **kwargs) -> None:
     # Update the configuration to use LocalStack or real AWS
     config_path = path.join(get_repo_path(), 'io_config.yaml')
     config_profile = 'default'
-    os.environ["AWS_ACCESS_KEY_ID"] = get_secret_value("AWS_ACCESS_KEY_ID")
-    os.environ["AWS_SECRET_ACCESS_KEY"] = get_secret_value("AWS_SECRET_ACCESS_KEY")
+    os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID")
+    os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
     
 
     for key in data.keys():
