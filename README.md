@@ -245,3 +245,8 @@ cd terraform
 terraform destroy -var-file="deployment.tfvars"
 ```
 If there are some hickups during the destroy-process it is most likely due to the S3 bucket still having objects in it. Just delete the objects over the AWS Console and restart the destroy-process. The process will now go through.
+
+## TODOs
+- Adding 3rd docker container with pgAdmin to [docker-compose](docker-compose.yml)
+  - Pre-configuring the container with database connection
+- Better secrets management
