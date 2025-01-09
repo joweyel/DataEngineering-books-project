@@ -220,36 +220,6 @@ resource "aws_db_subnet_group" "de-aurora-subnet-group" {
   }
 }
 
-
-# resource "aws_rds_cluster" "de-aurora-cluster" {
-
-#   cluster_identifier   = "aurora-cluster"
-#   engine               = "aurora-postgresql"
-#   engine_mode          = "provisioned"
-#   engine_version       = "16.6"
-#   database_name        = var.postgres-dbname
-#   master_username      = var.postgres-username
-#   master_password      = var.postgres-password
-
-#   skip_final_snapshot = true
-#   allocated_storage   = 20 # 20 GB (min. storage)
-
-#   scaling_configuration {
-#     auto_pause               = true
-#     min_capacity             = 1
-#     max_capacity             = 2
-#     seconds_until_auto_pause = 300
-#     timeout_action           = "ForceApplyCapacityChange"
-#   }
-
-#   # Put the cluster in the private subnet
-#   vpc_security_group_ids = [aws_security_group.de-rds-sg.id] # DB SG
-
-#   tags = {
-#     Name = "de-aurora-cluster"
-#   }
-# }
-
 resource "aws_rds_cluster" "de-aurora-cluster" {
   cluster_identifier = "aurora-cluster"
   availability_zones = [
@@ -295,34 +265,3 @@ resource "aws_rds_cluster_instance" "de-aurora-instance" {
     Name = "de-aurora-instance"
   }
 }
-
-
-# data "template_file" "docker_compose" {
-#   template = file("${path.module}/../docker-compose.yml.tpl")
-
-#   vars = {
-#     PROJECT_NAME      = var.project-name
-#     POSTGRES_DBNAME   = aws_rds_cluster.de-aurora-cluster.database_name
-#     POSTGRES_SCHEMA   = var.postgres-schema
-#     POSTGRES_USER     = aws_rds_cluster.de-aurora-cluster.master_username
-#     POSTGRES_PASSWORD = var.postgres-password
-#     POSTGRES_HOST     = aws_rds_cluster.de-aurora-cluster.endpoint
-#     POSTGRES_PORT     = aws_rds_cluster.de-aurora-cluster.port
-#   }
-# }
-
-# data "template_file" "docker_compose" {
-#   template = file("${path.module}/../docker-compose.yml.tpl")
-
-#   vars = {
-#     PROJECT_NAME      = var.project-name
-#     POSTGRES_DBNAME   = "dev" # aws_rds_cluster.de-aurora-cluster.database_name
-#     POSTGRES_SCHEMA   = var.postgres-schema
-#     POSTGRES_USER     = "admin" # aws_rds_cluster.de-aurora-cluster.master_username
-#     POSTGRES_PASSWORD = var.postgres-password
-#     POSTGRES_HOST     = "localhost" # aws_rds_cluster.de-aurora-cluster.endpoint
-#     POSTGRES_PORT     = 5432        # aws_rds_cluster.de-aurora-cluster.port
-#     S3_BUCKET_NAME    = var.s3-bucket-name
-#     AWS_REGION        = var.region
-#   }
-# }
